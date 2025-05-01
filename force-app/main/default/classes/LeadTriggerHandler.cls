@@ -109,22 +109,28 @@ public with sharing class LeadTriggerHandler {
         Map<Id,String> leadToEmailMap = new Map<Id,String>();
 		for (Lead lead : leads) {
 			if (lead.Email != null) {
-			leadToEmailMap.put(lead.Id, lead.Email);
+			leadToEmailMap.put(lead.Id, lead.Email.toLowerCase());
 		}
 	}
 
 		// Step 2: Find matching contacts based on email
-		Map<String, Contact> emailToContactMap = new Map<String, Contact>();
+		Map<String, List<Contact>> emailToContactsMap = new Map<String, List<Contact>>();
 		for (Contact c : [SELECT Id, Email, AccountId FROM Contact WHERE Email IN :leadToEmailMap.values()]) {
-			if (!emailToContactMap.containsKey(c.Email)) {
-				emailToContactMap.put(c.Email, c);
-			} else {
-				// If we found another contact with the same email, we don't auto-convert.
-				// So we remove the email from the map.
-				emailToContactMap.remove(c.Email);
+			String normalizedEmail = c.Email != null ? c.Email.toLowerCase() : null;
+			if (!emailToContactsMap.containsKey(normalizedEmail)) {
+				emailToContactsMap.put(normalizedEmail, new List<Contact>());
+			} 
+			emailToContactsMap.get(normalizedEmail).add(c);
 			}
 		}
-
+		// Create final map with only emails that had exactly ONE contact
+		Map<String, Contact> emailToContactMap = new Map<String, Contact>();
+		for (String email : emailToContactsMap.keySet()) {
+			List<Contact> contactList = emailToContactsMap.get(email);
+			if (contactList.Size() == 1) {
+				emailToContactMap.put(email, contactList[0]);
+			}
+		}
 		// Step 3: Auto-convert leads
 		List<Database.LeadConvert> leadConverts = new List<Database.LeadConvert>();
 		LeadStatus convertStatus = [SELECT Id, MasterLabel FROM LeadStatus WHERE IsConverted = TRUE LIMIT 1];
