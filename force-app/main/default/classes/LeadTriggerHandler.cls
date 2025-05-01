@@ -32,17 +32,18 @@ public with sharing class LeadTriggerHandler {
 	 */
 	public static void handleTitleNormalization(List<Lead> leadsToNormalize) {
 		for (Lead ld : leadsToNormalize) {
-			if (ld.title == 'vp' || ld.title.contains('v.p.') || ld.title.contains('vice president')) {
+			String titleLower = ld.Title != null ? ld.Title.toLowerCase() : '';
+			if (titleLower =='vp' || titleLower.contains('v.p.') || titleLower.contains('vice president')) {
 				ld.Title = 'Vice President';
 			} else if (
-				ld.title.contains('mgr') ||
-				ld.title.contains('manage') ||
-				ld.title.contains('head of department')
+				titleLower.contains('mgr') ||
+				titleLower.contains('manage') ||
+				titleLower.contains('head of department')
 			) {
 				ld.Title = 'Manager';
-			} else if (ld.title.contains('exec') || ld.title == 'chief' || ld.title.contains('head')) {
+			} else if (titleLower.contains('exec') || titleLower == 'chief' || titleLower.contains('head')) {
 				ld.Title = 'Executive';
-			} else if (ld.title.contains('assist') || ld.title.contains('deputy') || ld.title == 'jr') {
+			} else if (titleLower.contains('assist') || titleLower.contains('deputy') || titleLower == 'jr') {
 				ld.Title = 'Assistant';
 			}
 		}
