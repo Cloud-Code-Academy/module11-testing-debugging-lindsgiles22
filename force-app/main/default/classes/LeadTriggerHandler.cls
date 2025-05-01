@@ -108,8 +108,10 @@ public with sharing class LeadTriggerHandler {
 		// Step 1: Gather all lead emails
         Map<Id,String> leadToEmailMap = new Map<Id,String>();
 		for (Lead lead : leads) {
+			if (lead.Email != null) {
 			leadToEmailMap.put(lead.Id, lead.Email);
 		}
+	}
 
 		// Step 2: Find matching contacts based on email
 		Map<String, Contact> emailToContactMap = new Map<String, Contact>();
