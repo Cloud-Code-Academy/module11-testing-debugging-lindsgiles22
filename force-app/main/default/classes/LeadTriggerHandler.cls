@@ -151,4 +151,15 @@ public with sharing class LeadTriggerHandler {
 			List<Database.LeadConvertResult> lcrs = Database.convertLead(leadConverts);
 		}
 	}
+	public static List <Lead> getLeadsWithEmailChange(List<Lead> newLeads, List<Lead> oldLeads) {
+		List<Lead> leadsWithEmailChange = new List<Lead>();
+			for (Integer i = 0; i < Trigger.new.size(); i++) {
+				Lead newLead = Trigger.new[i];
+				Lead oldLead = Trigger.old[i];
+				if (newLead.Email != null && newLead.Email != oldLead.Email) {
+					leadsWithEmailChange.add(newLead);
+				}
+			}
+			return leadsWithEmailChange;
+	}
 }
