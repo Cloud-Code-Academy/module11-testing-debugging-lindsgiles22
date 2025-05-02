@@ -136,11 +136,11 @@ public with sharing class LeadTriggerHandler {
 		LeadStatus convertStatus = [SELECT Id, MasterLabel FROM LeadStatus WHERE IsConverted = TRUE LIMIT 1];
 		for (Id leadId : leadToEmailMap.keySet()) {
             String leadEmail = leadToEmailMap.get(leadId);
-			if (emailToContactMap.containsKey(leadEmail)) {
+			if (leadEmail != null && emailToContactMap.containsKey(leadEmail.toLowerCase())) {
 				Database.LeadConvert lc = new Database.LeadConvert();
 				lc.setLeadId(leadId);
-				lc.setContactId(emailToContactMap.get(leadEmail).Id); // Use existing Contact Id
-				lc.setAccountId(emailToContactMap.get(leadEmail).AccountId); // Use existing Account Id
+				lc.setContactId(emailToContactMap.get(leadEmail.toLowerCase()).Id); // Use existing Contact Id
+				lc.setAccountId(emailToContactMap.get(leadEmail.toLowercase()).AccountId); // Use existing Account Id
 				lc.setDoNotCreateOpportunity(true); // Assuming we don't want to create an opportunity
 				lc.setConvertedStatus(convertStatus.MasterLabel); // Set the converted status
 				leadConverts.add(lc);
