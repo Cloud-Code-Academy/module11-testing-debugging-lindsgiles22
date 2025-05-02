@@ -122,7 +122,7 @@ public with sharing class LeadTriggerHandler {
 			} 
 			emailToContactsMap.get(normalizedEmail).add(c);
 			}
-		}
+		
 		// Create final map with only emails that had exactly ONE contact
 		Map<String, Contact> emailToContactMap = new Map<String, Contact>();
 		for (String email : emailToContactsMap.keySet()) {
