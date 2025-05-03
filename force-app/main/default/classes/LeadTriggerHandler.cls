@@ -153,9 +153,9 @@ public with sharing class LeadTriggerHandler {
 	}
 	public static List <Lead> getLeadsWithEmailChange(List<Lead> newLeads, List<Lead> oldLeads) {
 		List<Lead> leadsWithEmailChange = new List<Lead>();
-			for (Integer i = 0; i < Trigger.new.size(); i++) {
-				Lead newLead = Trigger.new[i];
-				Lead oldLead = Trigger.old[i];
+			for (Integer i = 0; i < newLeads.size(); i++) {
+				Lead newLead = newLeads[i];
+				Lead oldLead = oldLeads[i];
 				if (newLead.Email != null && newLead.Email != oldLead.Email) {
 					leadsWithEmailChange.add(newLead);
 				}
