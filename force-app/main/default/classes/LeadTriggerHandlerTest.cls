@@ -10,7 +10,7 @@ public class LeadTriggerHandlerTest {
             Title = title
             );
             if(insertNow) {
-                instert testLead;
+                insert testLead;
             }
             return testLead;
         }
@@ -51,8 +51,8 @@ public class LeadTriggerHandlerTest {
             'jr@test.com' => 'Junior'
         };
         
-        for (Lead L1 : [SELECT Email, Title FROM Lead WHERE Email IN :expectedTitles.KeySet()]) {
-            System.assertEquals(expectedTitles.get(L1.email), L1.Title, 'Title normalization failed for ' + L1.Email);
+        for (Lead l : [SELECT Email, Title FROM Lead WHERE Email IN :expectedTitles.KeySet()]) {
+            System.assertEquals(expectedTitles.get(l.email), l.Title, 'Title normalization failed for ' + l.Email);
         }
     }
 
@@ -64,7 +64,7 @@ public class LeadTriggerHandlerTest {
         Test.stopTest();
 
         Lead updatedLead = [SELECT Title FROM Lead WHERE Id = :lead.Id];
-        System.assertEquals('Sales Associate', updateLead.Title, 'Expected title to be normalized but was not.');
+        System.assertEquals('Sales Associate', updatedLead.Title, 'Expected title to be normalized but was not.');
     }
 
     @isTest 
@@ -113,8 +113,8 @@ public class LeadTriggerHandlerTest {
         insert lead;
         Test.stopTest();
 
-        Lead updatedLead = [SELECT Custom_Lead_Score__c FROM Lead WHERE Id = :lead.Id];
-        System.assertNotEquals(null, updatedLead.Custom_Lead_Score__c, 'Lead score should be populated.');
+        Lead updatedLead = [SELECT Lead_Score__c FROM Lead WHERE Id = :lead.Id];
+        System.assertNotEquals(null, updatedLead.Lead_Score__c, 'Lead score should be populated.');
     }
 
     @isTest
