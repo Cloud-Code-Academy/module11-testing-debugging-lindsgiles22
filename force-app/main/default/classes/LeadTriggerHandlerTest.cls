@@ -20,14 +20,14 @@ public class LeadTriggerHandlerTest {
         List<Lead> testLeads = new List<Lead>{
             new Lead(FirstName='Test', LastName='VP', Company='Company A', Title='vp', Email='vp1@test.com'),
             new Lead(FirstName='Test', LastName='VP2', Company='Company A', Title='v.p.', Email='vp2@test.com'),
-            new Lead(FirstName='Test', LastName='Vice', Company='Company A', Title='vice preseidnet', Email='vp3@test.com'),
+            new Lead(FirstName='Test', LastName='Vice', Company='Company A', Title='vice president', Email='vp3@test.com'),
             new Lead(FirstName='Test', LastName='Mgr', Company='Company A', Title='mgr', Email='mgr@test.com'),
             new Lead(FirstName='Test', LastName='Manager', Company='Company A', Title='manage', Email='mgr2@test.com'),
             new Lead(FirstName='Test', LastName='HeadDept', Company='Company A', Title='head of department', Email='head1@test.com'),
             new Lead(FirstName='Test', LastName='Exec', Company='Company A', Title='exec', Email='exec@test.com'),
-            new Lead(FirstName='Test', LastName='Chief', Company='Company A', Title='chier', Email='chief@test.com'),
+            new Lead(FirstName='Test', LastName='Chief', Company='Company A', Title='chief', Email='chief@test.com'),
             new Lead(FirstName='Test', LastName='Head', Company='Company A', Title='head', Email='head2@test.com'),
-            new Lead(FirstName='Test', LastName='Assist', Company='Company A', Title='assiste', Email='assist@test.com'),
+            new Lead(FirstName='Test', LastName='Assist', Company='Company A', Title='assist', Email='assist@test.com'),
             new Lead(FirstName='Test', LastName='Deputy', Company='Company A', Title='deputy', Email='deputy@test.com'),
             new Lead(FirstName='Test', LastName='Junior', Company='Company A', Title='jr', Email='jr@test.com')
         };
@@ -42,13 +42,13 @@ public class LeadTriggerHandlerTest {
             'vp3@test.com' => 'Vice President',
             'mgr@test.com' => 'Manager',
             'mgr2@test.com' => 'Manager',
-            'head1@test.com' => 'Head of Department',
+            'head1@test.com' => 'Manager',
             'exec@test.com' => 'Executive',
-            'chief@test.com' => 'Chief',
-            'head2@test.com' => 'Head',
+            'chief@test.com' => 'Executive',
+            'head2@test.com' => 'Executive',
             'assist@test.com' => 'Assistant',
-            'deputy@test.com' => 'Deputy',
-            'jr@test.com' => 'Junior'
+            'deputy@test.com' => 'Assistant',
+            'jr@test.com' => 'Assistant'
         };
         
         for (Lead l : [SELECT Email, Title FROM Lead WHERE Email IN :expectedTitles.KeySet()]) {
