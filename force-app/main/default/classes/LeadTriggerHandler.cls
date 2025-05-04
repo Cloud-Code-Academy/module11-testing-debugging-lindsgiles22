@@ -32,17 +32,18 @@ public with sharing class LeadTriggerHandler {
 	 */
 	public static void handleTitleNormalization(List<Lead> leadsToNormalize) {
 		for (Lead ld : leadsToNormalize) {
-			if (ld.title == 'vp' || ld.title.contains('v.p.') || ld.title.contains('vice president')) {
+			String titleLower = ld.Title != null ? ld.Title.toLowerCase() : '';
+			if (titleLower =='vp' || titleLower.contains('v.p.') || titleLower.contains('vice president')) {
 				ld.Title = 'Vice President';
 			} else if (
-				ld.title.contains('mgr') ||
-				ld.title.contains('manage') ||
-				ld.title.contains('head of department')
+				titleLower.contains('mgr') ||
+				titleLower.contains('manage') ||
+				titleLower.contains('head of department')
 			) {
 				ld.Title = 'Manager';
-			} else if (ld.title.contains('exec') || ld.title == 'chief' || ld.title.contains('head')) {
+			} else if (titleLower.contains('exec') || titleLower == 'chief' || titleLower.contains('head')) {
 				ld.Title = 'Executive';
-			} else if (ld.title.contains('assist') || ld.title.contains('deputy') || ld.title == 'jr') {
+			} else if (titleLower.contains('assist') || titleLower.contains('deputy') || titleLower == 'jr') {
 				ld.Title = 'Assistant';
 			}
 		}
@@ -61,19 +62,19 @@ public with sharing class LeadTriggerHandler {
 	 */
 	public static void handleAutoLeadScoring(List<Lead> leadsToScore) {
 		for (Lead ld : leadsToScore) {
-			Integer score = 10;
+			Integer score = 0;
 
 			// Check and add points based on the specified conditions
 			if (ld.LeadSource == 'Website' && ld.Email != null) {
-				score = 3;
+				score += 3;
 			}
 
 			if (ld.Phone != null) {
-				score = 5;
+				score += 5;
 			}
 
 			if (ld.Industry == 'Technology') {
-				score = 10;
+				score += 10;
 			}
 
 			ld.Lead_Score__c = score; // Set the computed score back to the lead
@@ -107,31 +108,39 @@ public with sharing class LeadTriggerHandler {
 		// Step 1: Gather all lead emails
         Map<Id,String> leadToEmailMap = new Map<Id,String>();
 		for (Lead lead : leads) {
-			leadToEmailMap.put(lead.Id, lead.Email);
+			if (lead.Email != null) {
+			leadToEmailMap.put(lead.Id, lead.Email.toLowerCase());
 		}
+	}
 
 		// Step 2: Find matching contacts based on email
-		Map<String, Contact> emailToContactMap = new Map<String, Contact>();
+		Map<String, List<Contact>> emailToContactsMap = new Map<String, List<Contact>>();
 		for (Contact c : [SELECT Id, Email, AccountId FROM Contact WHERE Email IN :leadToEmailMap.values()]) {
-			if (!emailToContactMap.containsKey(c.Email)) {
-				emailToContactMap.put(c.Email, c);
-			} else {
-				// If we found another contact with the same email, we don't auto-convert.
-				// So we remove the email from the map.
-				emailToContactMap.remove(c.Email);
+			String normalizedEmail = c.Email != null ? c.Email.toLowerCase() : null;
+			if (!emailToContactsMap.containsKey(normalizedEmail)) {
+				emailToContactsMap.put(normalizedEmail, new List<Contact>());
+			} 
+			emailToContactsMap.get(normalizedEmail).add(c);
+			}
+		
+		// Create final map with only emails that had exactly ONE contact
+		Map<String, Contact> emailToContactMap = new Map<String, Contact>();
+		for (String email : emailToContactsMap.keySet()) {
+			List<Contact> contactList = emailToContactsMap.get(email);
+			if (contactList.Size() == 1) {
+				emailToContactMap.put(email, contactList[0]);
 			}
 		}
-
 		// Step 3: Auto-convert leads
 		List<Database.LeadConvert> leadConverts = new List<Database.LeadConvert>();
 		LeadStatus convertStatus = [SELECT Id, MasterLabel FROM LeadStatus WHERE IsConverted = TRUE LIMIT 1];
 		for (Id leadId : leadToEmailMap.keySet()) {
             String leadEmail = leadToEmailMap.get(leadId);
-			if (emailToContactMap.containsKey(leadEmail)) {
+			if (leadEmail != null && emailToContactMap.containsKey(leadEmail.toLowerCase())) {
 				Database.LeadConvert lc = new Database.LeadConvert();
 				lc.setLeadId(leadId);
-				lc.setContactId(emailToContactMap.get(leadEmail).Id); // Use existing Contact Id
-				lc.setAccountId(emailToContactMap.get(leadEmail).AccountId); // Use existing Account Id
+				lc.setContactId(emailToContactMap.get(leadEmail.toLowerCase()).Id); // Use existing Contact Id
+				lc.setAccountId(emailToContactMap.get(leadEmail.toLowercase()).AccountId); // Use existing Account Id
 				lc.setDoNotCreateOpportunity(true); // Assuming we don't want to create an opportunity
 				lc.setConvertedStatus(convertStatus.MasterLabel); // Set the converted status
 				leadConverts.add(lc);
@@ -141,5 +150,16 @@ public with sharing class LeadTriggerHandler {
 		if (!leadConverts.isEmpty()) {
 			List<Database.LeadConvertResult> lcrs = Database.convertLead(leadConverts);
 		}
+	}
+	public static List <Lead> getLeadsWithEmailChange(List<Lead> newLeads, List<Lead> oldLeads) {
+		List<Lead> leadsWithEmailChange = new List<Lead>();
+			for (Integer i = 0; i < newLeads.size(); i++) {
+				Lead newLead = newLeads[i];
+				Lead oldLead = oldLeads[i];
+				if (newLead.Email != null && newLead.Email != oldLead.Email) {
+					leadsWithEmailChange.add(newLead);
+				}
+			}
+			return leadsWithEmailChange;
 	}
 }
