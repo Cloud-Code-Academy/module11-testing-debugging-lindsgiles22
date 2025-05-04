@@ -147,7 +147,7 @@ static void testAutoLeadScoringVariants() {
 
     // Call the method to process the scores
     Test.startTest();
-    LeadTriggerHandler.handleAutoLeadScoring([SELECT Id, Email, Lead_Score__c FROM Lead WHERE Email IN :expectedScores.keySet()]);
+    LeadTriggerHandler.handleAutoLeadScoring([SELECT Id, Email, Lead_Score__c, LeadSource FROM Lead WHERE Email IN :expectedScores.keySet()]);
     Test.stopTest();
 
     // Assert that the actual scores match the expected scores
